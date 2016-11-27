@@ -2,6 +2,13 @@
     <string name="app_name">WatchSomeMovies</string>
 
     <string name="action_settings">Settings</string>
+    <string name="detail_upbar">Movie Info</string>
 
+    <string name="pref_sorting_key">Sorting</string>
+    <string name="pref_sorting_label">Sort By</string>
+    <string name="pref_sorting_default">popular</string>
+    <string name="pref_sorting_pop">popular</string>
+    <string name="pref_sorting_rate">top_rated</string>
 
+x
 </resources>

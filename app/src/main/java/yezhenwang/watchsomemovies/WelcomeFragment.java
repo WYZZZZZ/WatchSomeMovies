@@ -1,6 +1,7 @@
 package yezhenwang.watchsomemovies;
 
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.INotificationSideChannel;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -37,7 +39,7 @@ import java.util.ArrayList;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class WelcomeFragment extends Fragment {
+public class WelcomeFragment extends Fragment implements AdapterView.OnItemClickListener{
 
     private ArrayAdapter mMoviewAdapter;
 
@@ -75,6 +77,12 @@ public class WelcomeFragment extends Fragment {
 
         ListView movieList = (ListView) rootView.findViewById(R.id.movieList);
         movieList.setAdapter(mMoviewAdapter);
+        movieList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+            }
+        });
 
         return rootView;
     }
@@ -82,7 +90,8 @@ public class WelcomeFragment extends Fragment {
     private void updateMovie() {
         fetchMovieInfo movieInfo = new fetchMovieInfo();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        movieInfo.execute();
+        String sorting = preferences.getString(getString(R.string.pref_sorting_key), getString(R.string.pref_sorting_default));
+        movieInfo.execute(sorting);
     }
 
     @Override
@@ -102,10 +111,12 @@ public class WelcomeFragment extends Fragment {
             BufferedReader reader = null;
 
             String movieJsonStr = null;
-            String popularMovies = "https://api.themoviedb.org/3/movie/popular?api_key=4acf4cedab6f8c9e9b7a0a000eacf406&language=en-US";
+            String myKey = "4acf4cedab6f8c9e9b7a0a000eacf406";
+
+            String moviesURL = "https://api.themoviedb.org/3/movie/" + strings[0] + "?api_key=" + myKey + "&language=en-US";
 
             try {
-                Uri buildUri = Uri.parse(popularMovies).buildUpon().build();
+                Uri buildUri = Uri.parse(moviesURL).buildUpon().build();
                 URL url = new URL(buildUri.toString());
 
                 Log.v(LOG_TAG, "Built URI" + buildUri.toString());
@@ -200,15 +211,24 @@ public class WelcomeFragment extends Fragment {
             drawListView(arrayList);
 
         }
+    }
 
-        public void drawListView(ArrayList<DownloadResult> downloadResults) {
-            ArrayList<DownloadResult> results = new ArrayList<DownloadResult>();
-            ListView movieList = (ListView) getView().findViewById(R.id.movieList);
-            results = downloadResults;
-            ResultAdapter adapter = new ResultAdapter(getActivity(), downloadResults);
-            movieList.setAdapter(adapter);
-//            movieList.setOnItemClickListener((AdapterView.OnItemClickListener) this);
+    ArrayList<DownloadResult> results;
 
-        }
+    public void drawListView(ArrayList<DownloadResult> downloadResults) {
+        results = new ArrayList<DownloadResult>();
+        ListView movieList = (ListView) getView().findViewById(R.id.movieList);
+        results = downloadResults;
+        ResultAdapter adapter = new ResultAdapter(getActivity(), downloadResults);
+        movieList.setAdapter(adapter);
+        movieList.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        DownloadResult downloadResult = results.get(i);
+        Intent intent = new Intent(getActivity(), DetailActivity.class);
+        intent.putExtra("result", downloadResult);
+        startActivity(intent);
     }
 }
