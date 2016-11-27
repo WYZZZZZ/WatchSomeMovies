@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">WatchSomeMovies</string>
+
+    <string name="action_settings">Settings</string>
+
+
 </resources>
