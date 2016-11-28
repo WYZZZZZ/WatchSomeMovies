@@ -9,17 +9,13 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.INotificationSideChannel;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
+import android.widget.GridView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,11 +25,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -50,8 +46,9 @@ public class WelcomeFragment extends Fragment implements AdapterView.OnItemClick
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
+        //Enable option menu on the up bar
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -59,34 +56,20 @@ public class WelcomeFragment extends Fragment implements AdapterView.OnItemClick
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_welcome, container, false);
-        String[] movieName = {
-                "Movie 1",
-                "Movie 2",
-                "Movie 3",
-                "Movie 4",
-                "Movie 5",
-                "Movie 6",
-                "Movie 7",
-        };
+        List<String> movieName = new ArrayList<>();
 
         mMoviewAdapter = new ArrayAdapter<>(
                 getActivity(),
                 R.layout.my_array_adapter,
-                R.id.movieName,
                 movieName);
 
-        ListView movieList = (ListView) rootView.findViewById(R.id.movieList);
+        GridView movieList = (GridView) rootView.findViewById(R.id.movieList);
         movieList.setAdapter(mMoviewAdapter);
-        movieList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-            }
-        });
 
         return rootView;
     }
 
+    //Update downloader and gridView upon preferences change
     private void updateMovie() {
         fetchMovieInfo movieInfo = new fetchMovieInfo();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -100,10 +83,12 @@ public class WelcomeFragment extends Fragment implements AdapterView.OnItemClick
         updateMovie();
     }
 
+    //Downloader class downloading data from Json in the background thrad
     public class fetchMovieInfo extends AsyncTask<String, Void, ArrayList> {
 
         private final String LOG_TAG = fetchMovieInfo.class.getSimpleName();
 
+        //
         @Override
         protected ArrayList doInBackground(String... strings) {
 
@@ -111,9 +96,18 @@ public class WelcomeFragment extends Fragment implements AdapterView.OnItemClick
             BufferedReader reader = null;
 
             String movieJsonStr = null;
-            String myKey = "4acf4cedab6f8c9e9b7a0a000eacf406";
 
-            String moviesURL = "https://api.themoviedb.org/3/movie/" + strings[0] + "?api_key=" + myKey + "&language=en-US";
+            //Set movieDB user Key from strings.xml
+            String myKey = getString(R.string.my_moviedb_api_key);
+
+            /*Set URL according to the "strings" passed, the URL will either be popularity sorting
+              or average rating sorting
+             */
+            String moviesURL = getString(R.string.moviedb_base_url) +
+                    strings[0]
+                    + getString(R.string.apikey_keyword)
+                    + myKey
+                    + getString(R.string.moviedb_language_url);
 
             try {
                 Uri buildUri = Uri.parse(moviesURL).buildUpon().build();
@@ -169,6 +163,7 @@ public class WelcomeFragment extends Fragment implements AdapterView.OnItemClick
             return null;
         }
 
+        //Pass data from Json
         private ArrayList getMovieDataFromJson(String movieJsonStr) throws JSONException {
             final String OWN_RESULT = "results";
             final String OWN_POSTER = "poster_path";
@@ -179,7 +174,8 @@ public class WelcomeFragment extends Fragment implements AdapterView.OnItemClick
 
             ArrayList<DownloadResult> resultsArrayList = new ArrayList<DownloadResult>();
 
-            String posterStatic = "http://image.tmdb.org/t/p/w185/";
+            //Set the static part for image url
+            String posterStatic = getString(R.string.moviedb_w342);
 
             JSONObject movieJson = new JSONObject(movieJsonStr);
             JSONArray resultsArray = movieJson.getJSONArray(OWN_RESULT);
@@ -196,8 +192,9 @@ public class WelcomeFragment extends Fragment implements AdapterView.OnItemClick
                 overview = movieObject.getString(OWN_OVERVIEW);
                 releaseDate = movieObject.getString(OWN_RELEASE);
                 movieName = movieObject.getString(OWN_NAME);
-                voteAverage = "Avg. Rating: " + movieObject.getString(OWN_VOTE);
+                voteAverage = getString(R.string.avg_rating) + movieObject.getString(OWN_VOTE);
 
+                //Pass all useful data to an ArrayList
                 DownloadResult downloadResult = new DownloadResult(posterURL, overview, releaseDate, movieName, voteAverage);
                 resultsArrayList.add(downloadResult);
             }
@@ -205,25 +202,33 @@ public class WelcomeFragment extends Fragment implements AdapterView.OnItemClick
             return resultsArrayList;
         }
 
+        //Fill the gridView by the data from ArrayList above
         @Override
         protected void onPostExecute(ArrayList arrayList) {
             super.onPostExecute(arrayList);
-            drawListView(arrayList);
+            drawGridView(arrayList);
 
         }
     }
 
     ArrayList<DownloadResult> results;
 
-    public void drawListView(ArrayList<DownloadResult> downloadResults) {
+    //GridView filling class
+    public void drawGridView(ArrayList<DownloadResult> downloadResults) {
         results = new ArrayList<DownloadResult>();
-        ListView movieList = (ListView) getView().findViewById(R.id.movieList);
+        GridView movieList = (GridView) getView().findViewById(R.id.movieList);
+
+        int index = movieList.getFirstVisiblePosition();
+
         results = downloadResults;
         ResultAdapter adapter = new ResultAdapter(getActivity(), downloadResults);
         movieList.setAdapter(adapter);
         movieList.setOnItemClickListener(this);
+
+        movieList.setSelection(index);
     }
 
+    //Set on click listener for gridView elements
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         DownloadResult downloadResult = results.get(i);

@@ -9,6 +9,7 @@
     android:paddingRight="@dimen/welcome_horizontal_margin"
     android:paddingTop="@dimen/welcome_vertical_margin"
     android:orientation="vertical"
+    android:background="@color/coloBackground"
     tools:context="yezhenwang.watchsomemovies.WelcomeActivity">
 
     <fragment

@@ -5,4 +5,7 @@
 
     <dimen name="welcome_vertical_margin">8dp</dimen>
     <dimen name="welcome_horizontal_margin">8dp</dimen>
+
+    <dimen name="detail_vertical_margin">4dp</dimen>
+    <dimen name="detail_horizontal_margin">4dp</dimen>
 </resources>

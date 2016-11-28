@@ -10,5 +10,15 @@
     <string name="pref_sorting_pop">popular</string>
     <string name="pref_sorting_rate">top_rated</string>
 
-x
+    <string name="my_moviedb_api_key">4acf4cedab6f8c9e9b7a0a000eacf406</string>
+    <string name="moviedb_base_url">https://api.themoviedb.org/3/movie/</string>
+    <string name="apikey_keyword">\u003Fapi_key\u003D</string>
+    <string name="moviedb_language_url">"\u0026language=en-US"</string>
+    <string name="moviedb_w342">http://image.tmdb.org/t/p/w342/</string>
+
+    <string name="pass_value">result</string>
+
+    <string name="avg_rating">Avg. Rating: </string>
+
+
 </resources>
