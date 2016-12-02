@@ -10,7 +10,7 @@
     <string name="pref_sorting_pop">popular</string>
     <string name="pref_sorting_rate">top_rated</string>
 
-    <string name="my_moviedb_api_key">4acf4cedab6f8c9e9b7a0a000eacf406</string>
+    <string name="my_moviedb_api_key">YOUR_KEY_HERE</string>
     <string name="moviedb_base_url">https://api.themoviedb.org/3/movie/</string>
     <string name="apikey_keyword">\u003Fapi_key\u003D</string>
     <string name="moviedb_language_url">"\u0026language=en-US"</string>
